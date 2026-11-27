@@ -50,6 +50,55 @@
 </head>
 <body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200">
 
+  <!-- First-Screen Astrologer Logo & Login Gate (Email ID or Mobile OTP) -->
+  <div id="welcomeLoginGate" class="fixed inset-0 z-50 flex items-center justify-center bg-[#070a15]/95 p-4 backdrop-blur-md">
+    <div class="w-full max-w-md rounded-3xl border border-amber-400/35 bg-slate-900/95 p-6 sm:p-7 shadow-2xl space-y-5 text-center">
+      <!-- Astrologer Emblem / Logo -->
+      <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full gold-gradient text-slate-950 shadow-xl shadow-amber-500/30 ring-4 ring-amber-400/20">
+        <i data-lucide="sparkles" class="h-10 w-10"></i>
+      </div>
+      <div class="space-y-1">
+        <span class="inline-block rounded-full bg-emerald-500/15 border border-emerald-400/30 px-3 py-0.5 text-[11px] font-semibold text-emerald-300">First 5 Minutes FREE • Then ₹1 Trial → ₹59 AutoPay</span>
+        <h2 class="text-2xl font-extrabold gold-text">Sri NavaGraha Josiyam</h2>
+        <p class="text-xs text-slate-300">Login with Email ID or Mobile OTP to start your 5-Min Free AI Josiyam</p>
+      </div>
+
+      <!-- Login Tabs: Email vs Mobile OTP -->
+      <div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-950 p-1 border border-slate-800">
+        <button id="gateTabEmail" type="button" class="rounded-lg gold-gradient py-2 text-xs font-bold text-slate-950">Email ID Login</button>
+        <button id="gateTabPhone" type="button" class="rounded-lg py-2 text-xs font-semibold text-slate-300 hover:text-white">Mobile OTP</button>
+      </div>
+
+      <!-- Email Form -->
+      <form id="gateEmailForm" class="space-y-3 text-left">
+        <div>
+          <label for="gateNameInput" class="block text-xs text-slate-300 mb-1">Your Name</label>
+          <input id="gateNameInput" type="text" required placeholder="e.g. Devan" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none" />
+        </div>
+        <div>
+          <label for="gateEmailInput" class="block text-xs text-slate-300 mb-1">Email ID</label>
+          <input id="gateEmailInput" type="email" required placeholder="you@gmail.com" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none" />
+        </div>
+        <button type="submit" class="w-full rounded-xl gold-gradient py-3 text-sm font-bold text-slate-950 shadow-lg hover:brightness-110">Start 5 Min Free Josiyam</button>
+      </form>
+
+      <!-- Mobile OTP inside Gate -->
+      <div id="gatePhoneBox" class="hidden space-y-3 text-left">
+        <div id="gateOtpStep1" class="space-y-3">
+          <label for="gatePhoneInput" class="block text-xs text-slate-300">Mobile Number (+91)</label>
+          <input id="gatePhoneInput" type="tel" maxlength="10" placeholder="9876543210" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none" />
+          <button id="gateSendOtpBtn" type="button" class="w-full rounded-xl gold-gradient py-3 text-sm font-bold text-slate-950">Send OTP</button>
+        </div>
+        <div id="gateOtpStep2" class="hidden space-y-3">
+          <p id="gateOtpInfo" class="text-xs text-emerald-300"></p>
+          <input id="gateOtpInput" type="text" maxlength="6" placeholder="Enter 6-digit OTP" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white tracking-widest focus:border-amber-400 focus:outline-none" />
+          <button id="gateVerifyOtpBtn" type="button" class="w-full rounded-xl gold-gradient py-3 text-sm font-bold text-slate-950">Verify &amp; Enter App</button>
+        </div>
+      </div>
+      <p id="gateErrorMsg" class="hidden text-xs text-rose-400"></p>
+    </div>
+  </div>
+
   <!-- Top Navigation -->
   <header class="sticky top-0 z-40 border-b border-amber-500/20 bg-[#0b0f1e]/90 backdrop-blur-md">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -64,6 +113,10 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
+        <div id="trialTimerBadge" class="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/35 bg-amber-500/10 px-2.5 py-1.5 text-xs font-bold text-amber-300">
+          <i data-lucide="clock" class="h-3.5 w-3.5"></i>
+          <span id="trialTimerText">Free: 05:00</span>
+        </div>
         <button id="loginOtpBtn" type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/35 bg-emerald-500/15 px-2.5 py-1.5 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/25">
           <i data-lucide="smartphone" class="h-3.5 w-3.5"></i>
           <span id="loginOtpLabel">Login OTP</span>
@@ -241,7 +294,7 @@
         </div>
         <div class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200">
           <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="chatQuotaBadge">1-Day Free Trial → ₹59 AutoPay</span>
+          <span id="chatQuotaBadge">5 Min Free • ₹1 Now → ₹59 AutoPay</span>
         </div>
       </div>
 
@@ -264,7 +317,7 @@
           </div>
           <button id="unlockChatBtn" type="button" class="inline-flex items-center gap-1.5 rounded-xl gold-gradient px-3.5 py-2 text-xs font-bold text-slate-950 shadow-md hover:brightness-110">
             <i data-lucide="crown" class="h-3.5 w-3.5"></i>
-            <span id="unlockChatBtnText">Start 1-Day Free Trial (Then ₹59)</span>
+            <span id="unlockChatBtnText">Pay ₹1 Now → ₹59 AutoPay</span>
           </button>
         </div>
 
@@ -622,9 +675,9 @@
 
     const CHAT_PASS_PKG = {
       id: 'chatpass',
-      titleEn: 'VIP AutoPay (1-Day Free → ₹59/cycle)',
-      titleTa: 'VIP AutoPay (1 நாள் இலவசம் → ₹59)',
-      price: 59,
+      titleEn: 'VIP AutoPay (₹1 Now → ₹59 Next Cycle)',
+      titleTa: 'VIP AutoPay (முதலில் ₹1 → அடுத்து ₹59)',
+      price: 1,
       isSubscription: true
     };
 
@@ -961,7 +1014,7 @@
             key: subData.keyId,
             subscription_id: subData.subscriptionId,
             name: 'Sri NavaGraha Josiyam',
-            description: '1-Day Free Trial, then ₹59 AutoPay (Cancel anytime)',
+            description: '₹1 Verification Today, then ₹59 AutoPay (Cancel anytime)',
             prefill: { name: customerName },
             theme: { color: '#f59e0b' },
             handler: async function (response) {
@@ -1207,7 +1260,7 @@
         btnText.textContent = 'VIP Chat Active';
       } else {
         badge.textContent = `${state.freeMsgsLeft} Free Messages Left • Unlimited ₹99`;
-        btnText.textContent = 'Start 1-Day Free Trial (Then ₹59)';
+        btnText.textContent = 'Pay ₹1 Now → ₹59 AutoPay';
       }
     }
 
@@ -1446,6 +1499,138 @@
     });
 
     updateLoginBadge();
+
+    state.userEmail = '';
+    state.trialSecondsLeft = 300; // 5 Minutes Free
+    try {
+      state.userEmail = localStorage.getItem('josiyam_email_v1') || '';
+      const savedTimer = localStorage.getItem('josiyam_trial_sec_v1');
+      if (savedTimer !== null) state.trialSecondsLeft = Math.max(0, parseInt(savedTimer, 10) || 0);
+    } catch (e) {}
+
+    function enterAppAfterLogin(displayName, contactLabel) {
+      if (displayName) document.getElementById('userName').value = displayName;
+      document.getElementById('welcomeLoginGate').classList.add('hidden');
+      const lbl = document.getElementById('loginOtpLabel');
+      if (lbl && contactLabel) lbl.textContent = contactLabel;
+      updateFreePrediction();
+      startTrialCountdown();
+    }
+
+    function startTrialCountdown() {
+      if (window._trialInterval) clearInterval(window._trialInterval);
+      const tick = () => {
+        const el = document.getElementById('trialTimerText');
+        if (state.chatUnlocked) {
+          if (el) el.textContent = 'VIP Active';
+          return;
+        }
+        const m = String(Math.floor(state.trialSecondsLeft / 60)).padStart(2, '0');
+        const sec = String(state.trialSecondsLeft % 60).padStart(2, '0');
+        if (el) el.textContent = state.trialSecondsLeft > 0 ? `Free: ${m}:${sec}` : 'Trial Ended (₹1)';
+        if (state.trialSecondsLeft <= 0) {
+          clearInterval(window._trialInterval);
+          openChatPassCheckout();
+          return;
+        }
+        state.trialSecondsLeft -= 1;
+        try { localStorage.setItem('josiyam_trial_sec_v1', String(state.trialSecondsLeft)); } catch (e) {}
+      };
+      tick();
+      window._trialInterval = setInterval(tick, 1000);
+    }
+
+    document.getElementById('gateTabEmail').addEventListener('click', () => {
+      document.getElementById('gateTabEmail').className = 'rounded-lg gold-gradient py-2 text-xs font-bold text-slate-950';
+      document.getElementById('gateTabPhone').className = 'rounded-lg py-2 text-xs font-semibold text-slate-300 hover:text-white';
+      document.getElementById('gateEmailForm').classList.remove('hidden');
+      document.getElementById('gatePhoneBox').classList.add('hidden');
+    });
+
+    document.getElementById('gateTabPhone').addEventListener('click', () => {
+      document.getElementById('gateTabPhone').className = 'rounded-lg gold-gradient py-2 text-xs font-bold text-slate-950';
+      document.getElementById('gateTabEmail').className = 'rounded-lg py-2 text-xs font-semibold text-slate-300 hover:text-white';
+      document.getElementById('gatePhoneBox').classList.remove('hidden');
+      document.getElementById('gateEmailForm').classList.add('hidden');
+    });
+
+    document.getElementById('gateEmailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('gateNameInput').value.trim();
+      const email = document.getElementById('gateEmailInput').value.trim();
+      const err = document.getElementById('gateErrorMsg');
+      err.classList.add('hidden');
+      try {
+        await fetch('/api/email-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email })
+        });
+      } catch (ex) {}
+      state.userEmail = email;
+      try { localStorage.setItem('josiyam_email_v1', email); } catch (ex) {}
+      enterAppAfterLogin(name, email);
+    });
+
+    let gateDemoOtp = '';
+    document.getElementById('gateSendOtpBtn').addEventListener('click', async () => {
+      const phone = document.getElementById('gatePhoneInput').value.replace(/\D/g, '').slice(-10);
+      const err = document.getElementById('gateErrorMsg');
+      err.classList.add('hidden');
+      if (phone.length !== 10) {
+        err.textContent = 'Enter a valid 10-digit mobile number.';
+        err.classList.remove('hidden');
+        return;
+      }
+      try {
+        const res = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+        document.getElementById('gateOtpInfo').textContent = data.demoOtp
+          ? `Test OTP: ${data.demoOtp}`
+          : `OTP sent to +91 ${phone}`;
+      } catch (ex) {
+        gateDemoOtp = String(Math.floor(100000 + Math.random() * 900000));
+        document.getElementById('gateOtpInfo').textContent = `Demo OTP: ${gateDemoOtp}`;
+      }
+      document.getElementById('gateOtpStep1').classList.add('hidden');
+      document.getElementById('gateOtpStep2').classList.remove('hidden');
+    });
+
+    document.getElementById('gateVerifyOtpBtn').addEventListener('click', async () => {
+      const phone = document.getElementById('gatePhoneInput').value.replace(/\D/g, '').slice(-10);
+      const otp = document.getElementById('gateOtpInput').value.trim();
+      const err = document.getElementById('gateErrorMsg');
+      err.classList.add('hidden');
+      try {
+        const res = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, otp })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.verified) throw new Error('Invalid OTP');
+        state.userPhone = phone;
+        try { localStorage.setItem('josiyam_phone_v1', phone); } catch (ex) {}
+        enterAppAfterLogin('', `+91 ${phone}`);
+      } catch (ex) {
+        if (gateDemoOtp && otp === gateDemoOtp) {
+          state.userPhone = phone;
+          try { localStorage.setItem('josiyam_phone_v1', phone); } catch (ex2) {}
+          enterAppAfterLogin('', `+91 ${phone}`);
+        } else {
+          err.textContent = 'Invalid OTP. Please try again.';
+          err.classList.remove('hidden');
+        }
+      }
+    });
+
+    if (state.userEmail || state.userPhone) {
+      enterAppAfterLogin('', state.userPhone ? `+91 ${state.userPhone}` : state.userEmail);
+    }
 
     // Init
     populateDropdowns();
