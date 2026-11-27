@@ -42,6 +42,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Lightweight health check for UptimeRobot (keeps Render free tier awake)
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, ts: Date.now() });
+});
+
 app.get('/api/config', (req, res) => {
   res.json({
     live: Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
@@ -52,7 +57,20 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// SMS OTP Login Endpoints
+// Email or Mobile Login / OTP Endpoints
+app.post('/api/email-login', (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const name = String(req.body.name || '').trim() || email.split('@')[0] || 'User';
+  if (!email.includes('@')) {
+    return res.status(400).json({ error: 'Enter a valid Email ID' });
+  }
+  const user = usersStore.get(email) || { email, name, createdAt: Date.now(), vip: false };
+  user.name = name;
+  usersStore.set(email, user);
+  const token = crypto.randomBytes(16).toString('hex');
+  res.json({ verified: true, token, user });
+});
+
 app.post('/api/send-otp', async (req, res) => {
   try {
     const cleanPhone = String(req.body.phone || '').replace(/\D/g, '').slice(-10);
@@ -83,7 +101,6 @@ app.post('/api/send-otp', async (req, res) => {
       return res.json({ sent: true, mode: 'live_sms' });
     }
 
-    // Fallback test OTP when FAST2SMS_API_KEY is not configured yet
     return res.json({ sent: true, mode: 'test', demoOtp: code });
   } catch (err) {
     console.error('Send OTP error:', err);
@@ -110,13 +127,13 @@ app.post('/api/verify-otp', (req, res) => {
 // One-time order (Jathagam / Porutham / Live Call)
 app.post('/api/create-order', async (req, res) => {
   try {
-    const { pkgId, pkgTitle, amountInr, customerName, phone } = req.body;
+    const { pkgId, pkgTitle, amountInr, customerName, phone, email } = req.body;
     const amountPaise = Math.max(100, Math.round(Number(amountInr) * 100));
     const order = await razorpay.orders.create({
       amount: amountPaise,
       currency: 'INR',
       receipt: `josiyam_${Date.now()}`,
-      notes: { pkgId, pkgTitle, customerName, phone: phone || '' }
+      notes: { pkgId, pkgTitle, customerName, phone: phone || '', email: email || '' }
     });
     ordersStore.set(order.id, { orderId: order.id, pkgId, pkgTitle, amountInr, phone, status: 'created' });
     res.json({
@@ -150,21 +167,35 @@ app.post('/api/verify-payment', (req, res) => {
   res.json({ verified: true, paymentId: razorpay_payment_id });
 });
 
-// AutoPay Subscription: 1-Day Free Trial -> ₹59 Recurring
+// AutoPay Subscription: ₹1 Upfront Today -> ₹59 Recurring from Tomorrow (+24 hrs)
 app.post('/api/create-subscription', async (req, res) => {
   try {
     if (!process.env.RAZORPAY_PLAN_ID) {
       return res.status(400).json({ error: 'RAZORPAY_PLAN_ID not configured' });
     }
-    const { customerName, phone } = req.body;
-    const startAt = Math.floor(Date.now() / 1000) + 86400; // +24 hours (1-Day Free Trial)
+    const { customerName, phone, email } = req.body;
+    const startAt = Math.floor(Date.now() / 1000) + 86400; // +24 hours before ₹59 recurring starts
     const sub = await razorpay.subscriptions.create({
       plan_id: process.env.RAZORPAY_PLAN_ID,
       total_count: 52,
       quantity: 1,
       customer_notify: 1,
       start_at: startAt,
-      notes: { customerName: customerName || 'Guest', phone: phone || '', trial: '1_day_free_then_59_inr' }
+      addons: [
+        {
+          item: {
+            name: 'VIP Trial Mandate Activation (₹1 Today, ₹59 Next Cycle)',
+            amount: 100, // 100 paise = ₹1
+            currency: 'INR'
+          }
+        }
+      ],
+      notes: {
+        customerName: customerName || 'Guest',
+        phone: phone || '',
+        email: email || '',
+        flow: '5min_free_then_1_inr_then_59_autopay'
+      }
     });
     res.json({
       subscriptionId: sub.id,
@@ -178,7 +209,7 @@ app.post('/api/create-subscription', async (req, res) => {
 });
 
 app.post('/api/verify-subscription', (req, res) => {
-  const { subscriptionId, razorpay_payment_id, razorpay_signature, phone } = req.body;
+  const { subscriptionId, razorpay_payment_id, razorpay_signature, phone, email } = req.body;
   if (!subscriptionId || !razorpay_payment_id || !razorpay_signature) {
     return res.status(400).json({ verified: false });
   }
@@ -192,7 +223,8 @@ app.post('/api/verify-subscription', (req, res) => {
     crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature));
 
   if (!valid) return res.status(400).json({ verified: false });
-  if (phone && usersStore.has(phone)) usersStore.get(phone).vip = true;
+  const key = phone || email;
+  if (key && usersStore.has(key)) usersStore.get(key).vip = true;
   res.json({ verified: true, subscriptionId, paymentId: razorpay_payment_id });
 });
 
