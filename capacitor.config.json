@@ -1,0 +1,9 @@
+{
+  "appId": "com.navagraha.josiyam",
+  "appName": "Sri NavaGraha Josiyam",
+  "webDir": "public",
+  "server": {
+    "url": "https://YOUR-RENDER-APP-URL.onrender.com",
+    "cleartext": false
+  }
+}
